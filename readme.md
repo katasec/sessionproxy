@@ -1,3 +1,3 @@
 # Overview
 
-Session proxy routes requests to the end users based on their identity.
+Session proxy routes requests to end users based on their identity.
