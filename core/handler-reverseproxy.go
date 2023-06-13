@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 )
 
-//http.Redirect(w, r, logoutUrl.String(), http.StatusTemporaryRedirect)
-
-func (s *Server) logoutHandler(next ...http.HandlerFunc) http.HandlerFunc {
+func (s *Server) reverseProxyHandler(next ...http.HandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("In the logout handler func")
@@ -27,17 +24,5 @@ func (s *Server) logoutHandler(next ...http.HandlerFunc) http.HandlerFunc {
 			h := next[0]
 			h.ServeHTTP(w, r)
 		}
-
 	}
-}
-
-func deleteCookie(w http.ResponseWriter, name string) {
-	cookie := http.Cookie{
-		Name:    name,
-		Value:   "",
-		Path:    "/",
-		MaxAge:  -1,
-		Expires: time.Now().Add(-1 * time.Hour),
-	}
-	http.SetCookie(w, &cookie)
 }

@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"golang.org/x/oauth2"
 )
 
 func (s *Server) callBack(next ...http.HandlerFunc) http.HandlerFunc {
@@ -17,10 +19,11 @@ func (s *Server) callBack(next ...http.HandlerFunc) http.HandlerFunc {
 		log.Println("The code was:", code[0:10])
 
 		// Get the auth session from the request
-		oauth2Token, err := auth.Config.Exchange(ctx, code)
+		oauth2Token, err := auth.Config.Exchange(ctx, code, oauth2.SetAuthURLParam("redirect_uri", callbackUrl))
 		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			message := "Could not get authToken from 'code':" + err.Error()
+			log.Println(message)
+			http.Error(w, message, http.StatusInternalServerError)
 			return
 		}
 

@@ -25,5 +25,6 @@ func (s *Server) loginHandler(next ...http.HandlerFunc) http.HandlerFunc {
 			h := next[0]
 			h.ServeHTTP(w, r)
 		}
+
 	}
 }
