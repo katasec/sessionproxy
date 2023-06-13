@@ -23,7 +23,7 @@ func extractTokenClaims(idToken *oidc.IDToken) (claims *Claims, err error) {
 	return claims, nil
 }
 
-func getCookieClaims(w http.ResponseWriter, r *http.Request) (claims *Claims) {
+func getCookieClaims(r *http.Request) (claims *Claims) {
 
 	var rawIDToken string
 

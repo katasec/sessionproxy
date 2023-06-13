@@ -14,7 +14,7 @@ func (s *Server) statusHandler(next ...http.HandlerFunc) http.HandlerFunc {
 		log.Println("In the status handler func")
 
 		// Get the claims from auth cookie
-		claims := getCookieClaims(w, r)
+		claims := getCookieClaims(r)
 
 		// Display welcome message
 		tmStamp := time.Now().Format("2006-01-02 15:04:05")
