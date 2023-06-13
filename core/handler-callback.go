@@ -19,7 +19,7 @@ func (s *Server) callBack(next ...http.HandlerFunc) http.HandlerFunc {
 		log.Println("The code was:", code[0:10])
 
 		// Get the auth session from the request
-		oauth2Token, err := auth.Config.Exchange(ctx, code, oauth2.SetAuthURLParam("redirect_uri", callbackUrl))
+		oauth2Token, err := auth.Config.Exchange(ctx, code, oauth2.SetAuthURLParam(redirectUriParam, callbackUrl))
 		if err != nil {
 			message := "Could not get authToken from 'code':" + err.Error()
 			log.Println(message)

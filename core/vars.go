@@ -16,9 +16,10 @@ var (
 	ctx   context.Context
 	state string
 
-	logoutUrl   string
-	callbackUrl string
-	statusUrl   string
+	logoutUrl        string
+	callbackUrl      string
+	statusUrl        string
+	redirectUriParam string
 )
 
 func init() {
@@ -72,4 +73,7 @@ func init() {
 
 	// Callback url
 	callbackUrl = "http://localhost:5000/.pathfinder/callback"
+
+	// Redirect Uri Param Name
+	redirectUriParam = "redirect_uri"
 }
