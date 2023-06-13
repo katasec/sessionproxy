@@ -17,7 +17,7 @@ func (s *Server) callBack(next ...http.HandlerFunc) http.HandlerFunc {
 		log.Println("The code was:", code[0:10])
 
 		// Get the auth session from the request
-		oauth2Token, err := auth.Config.Exchange(ctx, r.URL.Query().Get("code"))
+		oauth2Token, err := auth.Config.Exchange(ctx, code)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -33,15 +33,6 @@ func (s *Server) callBack(next ...http.HandlerFunc) http.HandlerFunc {
 			os.Exit(1)
 		}
 
-		// Parse and verify ID Token payload.
-		// idToken, err := auth.Verifier.Verify(ctx, rawIDToken)
-		// if err != nil {
-		// 	log.Println("Failed to verify ID Token: ", err)
-		// 	// http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	log.Println(err.Error())
-		// 	//return
-		// }
-
 		// Create session cookie
 		cookie := http.Cookie{
 			Name:    "rawIDToken",
@@ -51,8 +42,8 @@ func (s *Server) callBack(next ...http.HandlerFunc) http.HandlerFunc {
 		}
 		http.SetCookie(w, &cookie)
 
-		// Redirect to home page
-		http.Redirect(w, r, "/", http.StatusFound)
+		// Redirect to status page
+		http.Redirect(w, r, statusUrl, http.StatusFound)
 
 		// Process next middleware
 		if (next != nil) && (len(next) > 0) {

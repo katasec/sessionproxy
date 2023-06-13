@@ -2,9 +2,10 @@ package core
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"log"
 	"net/url"
-	"os"
 
 	oidc "github.com/coreos/go-oidc"
 	"golang.org/x/oauth2"
@@ -22,17 +23,17 @@ func NewAuthenticator(redirectUrl ...string) (*Authenticator, error) {
 
 	// Create Provider from Azure AD + Tenant ID
 	ctx := context.Background()
-	provider, err := oidc.NewProvider(ctx, "https://login.microsoftonline.com/"+os.Getenv("AZURE_TENANT_ID")+"/v2.0")
+	provider, err := oidc.NewProvider(ctx, "https://login.microsoftonline.com/"+azureTenantId+"/v2.0")
 	if err != nil {
 		log.Printf("failed to get provider: %v", err)
 		return nil, err
 	}
 
 	// Create Verifier from Provider
-	verifier := provider.Verifier(&oidc.Config{ClientID: os.Getenv("AZURE_CLIENT_ID")})
+	verifier := provider.Verifier(&oidc.Config{ClientID: azureClientId})
 
 	// Init Logout Url
-	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + os.Getenv("AZURE_TENANT_ID") + "/oauth2/logout?client_id=" + os.Getenv("AZURE_CLIENT_ID"))
+	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + azureTenantId + "/oauth2/logout?client_id=" + azureClientId)
 	if err != nil {
 		log.Printf("failed to parse logout url: %v", err)
 		return nil, err
@@ -40,11 +41,11 @@ func NewAuthenticator(redirectUrl ...string) (*Authenticator, error) {
 
 	// Create Config from Provider
 	if redirectUrl == nil {
-		redirectUrl = []string{"http://localhost:5000/.pathfinder/callback"}
+		redirectUrl = []string{callbackUrl}
 	}
 	conf := oauth2.Config{
-		ClientID:     os.Getenv("AZURE_CLIENT_ID"),
-		ClientSecret: os.Getenv("AZURE_CLIENT_SECRET"),
+		ClientID:     azureClientId,
+		ClientSecret: azureClientSecret,
 		RedirectURL:  redirectUrl[0],
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
@@ -57,4 +58,15 @@ func NewAuthenticator(redirectUrl ...string) (*Authenticator, error) {
 		Verifier:  verifier,
 		LogoutUrl: logoutUrl.String(),
 	}, nil
+}
+
+// generateRandomState Used by the loginHandler to generate a random state
+// whilst redirecting to Azure AD. The state is used to prevent CSRF attacks.
+func generateRandomState() string {
+
+	// Generate random state
+	b := make([]byte, 32)
+	rand.Read(b)
+
+	return base64.StdEncoding.EncodeToString(b)
 }

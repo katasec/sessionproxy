@@ -37,7 +37,6 @@ func getCookieClaims(w http.ResponseWriter, r *http.Request) (claims *Claims) {
 	}
 
 	if rawIDToken != "" {
-		log.Println("rawIDToken was found: ", rawIDToken)
 		idToken, err := auth.Verifier.Verify(ctx, rawIDToken)
 		if err != nil {
 			log.Println("Failed to verify ID Token: ", idToken)
@@ -54,7 +53,6 @@ func getCookieClaims(w http.ResponseWriter, r *http.Request) (claims *Claims) {
 
 		return claims
 	} else {
-		log.Println("rawIDToken was not found: ", rawIDToken)
 		return &Claims{Authenticated: false}
 	}
 

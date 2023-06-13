@@ -2,22 +2,23 @@ package core
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"log"
 	"net/url"
 	"os"
 )
 
 var (
-	auth              *Authenticator
-	ctx               context.Context
-	state             string
-	logoutUrl         string
 	azureTenantId     string
 	azureClientId     string
 	azureClientSecret string
-	//Store *sessions.CookieStore
+
+	auth  *Authenticator
+	ctx   context.Context
+	state string
+
+	logoutUrl   string
+	callbackUrl string
+	statusUrl   string
 )
 
 func init() {
@@ -66,14 +67,9 @@ func init() {
 	}
 	logoutUrl = mylogoutUrl.String()
 
-}
+	// Init Pathfinder Status Url
+	statusUrl = "/.pathfinder/status"
 
-// generateRandomState Creates a random state string
-func generateRandomState() string {
-
-	// Generate random state
-	b := make([]byte, 32)
-	rand.Read(b)
-
-	return base64.StdEncoding.EncodeToString(b)
+	// Callback url
+	callbackUrl = "http://localhost:5000/.pathfinder/callback"
 }
