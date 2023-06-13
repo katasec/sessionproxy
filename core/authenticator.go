@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"log"
+	"net/url"
 	"os"
 
 	oidc "github.com/coreos/go-oidc"
@@ -10,10 +11,11 @@ import (
 )
 
 type Authenticator struct {
-	Provider *oidc.Provider
-	Verifier *oidc.IDTokenVerifier
-	Config   oauth2.Config
-	Ctx      context.Context
+	Provider  *oidc.Provider
+	Verifier  *oidc.IDTokenVerifier
+	Config    oauth2.Config
+	Ctx       context.Context
+	LogoutUrl string
 }
 
 func NewAuthenticator(redirectUrl ...string) (*Authenticator, error) {
@@ -29,11 +31,17 @@ func NewAuthenticator(redirectUrl ...string) (*Authenticator, error) {
 	// Create Verifier from Provider
 	verifier := provider.Verifier(&oidc.Config{ClientID: os.Getenv("AZURE_CLIENT_ID")})
 
-	// Create Config from Provider
-	if redirectUrl == nil {
-		redirectUrl = []string{"http://localhost:5000/.pathfinder/status"}
+	// Init Logout Url
+	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + os.Getenv("AZURE_TENANT_ID") + "/oauth2/logout?client_id=" + os.Getenv("AZURE_CLIENT_ID"))
+	if err != nil {
+		log.Printf("failed to parse logout url: %v", err)
+		return nil, err
 	}
 
+	// Create Config from Provider
+	if redirectUrl == nil {
+		redirectUrl = []string{"http://localhost:5000/.pathfinder/callback"}
+	}
 	conf := oauth2.Config{
 		ClientID:     os.Getenv("AZURE_CLIENT_ID"),
 		ClientSecret: os.Getenv("AZURE_CLIENT_SECRET"),
@@ -43,9 +51,10 @@ func NewAuthenticator(redirectUrl ...string) (*Authenticator, error) {
 	}
 
 	return &Authenticator{
-		Provider: provider,
-		Config:   conf,
-		Ctx:      ctx,
-		Verifier: verifier,
+		Provider:  provider,
+		Config:    conf,
+		Ctx:       ctx,
+		Verifier:  verifier,
+		LogoutUrl: logoutUrl.String(),
 	}, nil
 }

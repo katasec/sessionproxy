@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (s *Server) loginHandler2(next ...http.HandlerFunc) http.HandlerFunc {
+func (s *Server) loginHandler(next ...http.HandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("In the login handler func")
@@ -17,7 +17,8 @@ func (s *Server) loginHandler2(next ...http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		log.Printf("Redirecting to: %v", authenticator.Config.AuthCodeURL(state))
-		http.Redirect(w, r, authenticator.Config.AuthCodeURL(state), http.StatusFound)
+
+		http.Redirect(w, r, authenticator.Config.AuthCodeURL(state), http.StatusTemporaryRedirect)
 
 		// Process next middleware
 		if (next != nil) && (len(next) > 0) {

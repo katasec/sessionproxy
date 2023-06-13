@@ -5,12 +5,18 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"log"
+	"net/url"
+	"os"
 )
 
 var (
-	auth  *Authenticator
-	ctx   context.Context
-	state string
+	auth              *Authenticator
+	ctx               context.Context
+	state             string
+	logoutUrl         string
+	azureTenantId     string
+	azureClientId     string
+	azureClientSecret string
 	//Store *sessions.CookieStore
 )
 
@@ -21,18 +27,45 @@ func init() {
 	// Initialize Context
 	ctx = context.Background()
 
+	// Init Azure Tenant Id
+	azureTenantId = os.Getenv("AZURE_TENANT_ID")
+	if azureTenantId == "" {
+		log.Println("AZURE_TENANT_ID not set")
+		os.Exit(1)
+	}
+
+	// Init Azure Client Id
+	azureClientId = os.Getenv("AZURE_CLIENT_ID")
+	if azureClientId == "" {
+		log.Println("AZURE_CLIENT_ID not set")
+		os.Exit(1)
+	}
+
+	// Init Azure Client Secret
+	azureClientSecret = os.Getenv("AZURE_CLIENT_SECRET")
+	if azureClientSecret == "" {
+		log.Println("AZURE_CLIENT_SECRET not set")
+		os.Exit(1)
+	}
+
 	// Initialize Authenticator
 	auth, err = NewAuthenticator()
 	if err != nil {
-		log.Println("Error initalizaing authenticator:", err.Error())
-		return
+		log.Println("Error initalizing authenticator:", err.Error())
+		os.Exit(1)
 	}
 
 	// Initialize Random State
 	state = generateRandomState()
 
-	// Initialize Cookie Store
-	//Store = sessions.NewCookieStore([]byte("secret"))
+	// Init Logout Url
+	mylogoutUrl, err := url.Parse("https://login.microsoftonline.com/" + azureTenantId + "/oauth2/logout?client_id=" + azureClientId)
+	if err != nil {
+		log.Printf("failed to parse logout url: %v", err)
+		os.Exit(1)
+	}
+	logoutUrl = mylogoutUrl.String()
+
 }
 
 // generateRandomState Creates a random state string
