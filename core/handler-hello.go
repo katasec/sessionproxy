@@ -1,14 +1,15 @@
 package core
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 )
 
 func (s *Server) helloHandler(next ...http.HandlerFunc) http.HandlerFunc {
+
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		fmt.Fprintf(w, "Hello World")
+		log.Println("In the hello handler func")
 
 		// Process next middleware
 		if (next != nil) && (len(next) > 0) {
