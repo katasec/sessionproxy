@@ -46,7 +46,7 @@ func (s *Server) callBack(next ...http.HandlerFunc) http.HandlerFunc {
 		http.SetCookie(w, &cookie)
 
 		// Redirect to status page
-		http.Redirect(w, r, statusUrl, http.StatusFound)
+		http.Redirect(w, r, pfStatusUrl, http.StatusFound)
 
 		// Process next middleware
 		if (next != nil) && (len(next) > 0) {

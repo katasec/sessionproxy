@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -17,12 +16,17 @@ var (
 	ctx   context.Context
 	state string
 
-	logoutUrl        string
+	azureLogoutUrl   string
 	callbackUrl      string
-	statusUrl        string
 	redirectUriParam string
 
 	SPROXY_PORT string
+
+	pfLoginUrl    string
+	pfLogoutUrl   string
+	pfStatusUrl   string
+	pfProxyPath   string
+	pfCallbackUrl string
 )
 
 func init() {
@@ -53,6 +57,13 @@ func init() {
 		os.Exit(1)
 	}
 
+	// Init listen port SPROXY_PORT
+	SPROXY_PORT = os.Getenv("SPROXY_PORT")
+	if SPROXY_PORT == "" {
+		log.Println("SPROXY_PORT not set, defaulting to 8080")
+		SPROXY_PORT = "8080"
+	}
+
 	// Initialize Authenticator
 	auth, err = NewAuthenticator()
 	if err != nil {
@@ -63,25 +74,32 @@ func init() {
 	// Initialize Random State
 	state = generateRandomState()
 
-	// Init Logout Url
+	// Init Azure Logout Url
 	mylogoutUrl, err := url.Parse("https://login.microsoftonline.com/" + azureTenantId + "/oauth2/logout?client_id=" + azureClientId)
 	if err != nil {
 		log.Printf("failed to parse logout url: %v", err)
 		os.Exit(1)
 	}
-	logoutUrl = mylogoutUrl.String()
+	azureLogoutUrl = mylogoutUrl.String()
+
+	// Init OAuth2 Callback Url
+	callbackUrl = "https://portal.qntest.com/ameer/.pathfinder/callback"
+	log.Println("Call back url is:", callbackUrl)
+
+	// Init Pathfinder Login Url
+	pfLoginUrl = "/ameer/.pathfinder/login"
+
+	// Init Pathfinder Logout Url
+	pfLogoutUrl = "/ameer/.pathfinder/logout"
 
 	// Init Pathfinder Status Url
-	statusUrl = "/.pathfinder/status"
+	pfStatusUrl = "/ameer/.pathfinder/status"
 
-	// Callback url
-	SPROXY_PORT = os.Getenv("SPROXY_PORT")
-	if SPROXY_PORT == "" {
-		log.Println("SPROXY_PORT not set, defaulting to 8080")
-		SPROXY_PORT = "8080"
-	}
-	callbackUrl = fmt.Sprintf("http://localhost:%s/.pathfinder/callback", SPROXY_PORT)
-	log.Println("Call back url is:", callbackUrl)
+	// Init Pathfinder Status Url
+	pfCallbackUrl = "/ameer/.pathfinder/callback"
+
+	// Init Proxy Path
+	pfProxyPath = "/ameer"
 
 	// Redirect Uri Param Name
 	redirectUriParam = "redirect_uri"

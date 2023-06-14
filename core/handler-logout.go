@@ -19,8 +19,8 @@ func (s *Server) logoutHandler(next ...http.HandlerFunc) http.HandlerFunc {
 		deleteCookie(w, "rawIDToken")
 
 		// Redirect to Azure AD logout
-		fmt.Println("Redirecitng to: ", logoutUrl)
-		http.Redirect(w, r, logoutUrl, http.StatusTemporaryRedirect)
+		fmt.Println("Redirecitng to: ", azureLogoutUrl)
+		http.Redirect(w, r, azureLogoutUrl, http.StatusTemporaryRedirect)
 
 		// Process next middleware
 		if (next != nil) && (len(next) > 0) {
