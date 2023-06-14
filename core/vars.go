@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -20,6 +21,8 @@ var (
 	callbackUrl      string
 	statusUrl        string
 	redirectUriParam string
+
+	SPROXY_PORT string
 )
 
 func init() {
@@ -72,7 +75,13 @@ func init() {
 	statusUrl = "/.pathfinder/status"
 
 	// Callback url
-	callbackUrl = "http://localhost:5000/.pathfinder/callback"
+	SPROXY_PORT = os.Getenv("SPROXY_PORT")
+	if SPROXY_PORT == "" {
+		log.Println("SPROXY_PORT not set, defaulting to 8080")
+		SPROXY_PORT = "8080"
+	}
+	callbackUrl = fmt.Sprintf("http://localhost:%s/.pathfinder/callback", SPROXY_PORT)
+	log.Println("Call back url is:", callbackUrl)
 
 	// Redirect Uri Param Name
 	redirectUriParam = "redirect_uri"

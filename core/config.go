@@ -5,7 +5,8 @@ type Config struct {
 }
 
 func NewConfig() *Config {
+
 	return &Config{
-		Port: "5000",
+		Port: SPROXY_PORT,
 	}
 }
